@@ -1,0 +1,80 @@
+[workspace]
+resolver = "2"
+members = [
+    # L0: leaf crates (no internal deps)
+    "src/config",
+    "src/sbi-rt",
+    "src/arch/riscv/riscv-regs",
+    # L1: depends on L0
+    "src/vcpu",
+    "src/interrupt",
+    "src/utils",
+    # L2: depends on L1
+    "src/tvm",
+    "src/ecall",
+    # L3: depends on L2
+    "src/trap",
+    # Root
+    ".",
+]
+
+[workspace.package]
+version = "0.2.0"
+edition = "2021"
+authors = ["DAMO Inc."]
+description = "CoVE TSM (PoC) — A single-TVM/single-core reference implementation of the RISC-V TEE Security Manager"
+
+[workspace.dependencies]
+# Internal crates
+config = { path = "src/config" }
+vcpu = { path = "src/vcpu" }
+sbi-rt = { path = "src/sbi-rt" }
+utils = { path = "src/utils" }
+riscv-regs = { path = "src/arch/riscv/riscv-regs" }
+tvm = { path = "src/tvm" }
+ecall = { path = "src/ecall" }
+interrupt = { path = "src/interrupt" }
+trap = { path = "src/trap" }
+
+# Third-party crates
+spin = { version = "0.9.9", default-features = false, features = ["mutex", "rwlock", "once", "spin_mutex"] }
+memoffset = { version = "0.8.0" }
+seq-macro = { version = "0.3.2" }
+tock-registers = { version = "0.7.0", default-features = false, features = ["register_types"] }
+
+[package]
+name = "tsm"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "tsm"
+path = "src/main.rs"
+# The bin target requires bare-metal RISC-V; the feature is only passed by
+# build.sh when building for the riscv64gc-unknown-none-elf target.
+required-features = ["riscv-bare"]
+
+[features]
+riscv-bare = []
+tsm-debug = ["ecall/tsm-debug"]
+
+[profile.release]
+overflow-checks = true
+lto = "fat"
+codegen-units = 1
+
+[lib]
+name = "tsm"
+path = "src/lib.rs"
+
+[dependencies]
+config = { workspace = true }
+riscv-regs = { workspace = true }
+vcpu = { workspace = true }
+utils = { workspace = true }
+sbi-rt = { workspace = true }
+tvm = { workspace = true }
+ecall = { workspace = true }
+interrupt = { workspace = true }
+trap = { workspace = true }
+memoffset = { workspace = true }

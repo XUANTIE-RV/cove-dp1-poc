@@ -1,0 +1,8 @@
+[package]
+name = "riscv-regs"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+seq-macro = { workspace = true }
+tock-registers = { workspace = true }

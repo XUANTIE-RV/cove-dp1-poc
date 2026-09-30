@@ -1,0 +1,16 @@
+[package]
+name = "ecall"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+config = { workspace = true }
+tvm = { workspace = true }
+sbi-rt = { workspace = true }
+riscv-regs = { workspace = true }
+vcpu = { workspace = true }
+utils = { workspace = true }
+memoffset = { workspace = true }
+
+[features]
+tsm-debug = []

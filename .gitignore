@@ -1,0 +1,20 @@
+# Build artifacts
+**/build/
+**/target/
+
+# Release assets
+cove-dp1-poc-runtime-rv64/
+xuantie-qemu-riscv64-x86_64-linux/
+*.tar.gz
+
+# Local development artifacts
+stress_tvm.sh
+
+# Editor / OS scratch files
+**/*.orig
+**/*.rs.bk
+**/*.sw[po]
+*~
+.idea/
+.vscode/
+.DS_Store

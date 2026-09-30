@@ -1,0 +1,8 @@
+[package]
+name = "utils"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+sbi-rt = { workspace = true }
+spin = { workspace = true }

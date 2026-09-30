@@ -1,0 +1,13 @@
+[package]
+name = "trap"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+config = { workspace = true }
+ecall = { workspace = true }
+interrupt = { workspace = true }
+riscv-regs = { workspace = true }
+sbi-rt = { workspace = true }
+utils = { workspace = true }
+memoffset = { workspace = true }

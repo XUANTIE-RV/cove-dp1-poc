@@ -1,0 +1,7 @@
+[package]
+name = "interrupt"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+riscv-regs = { workspace = true }

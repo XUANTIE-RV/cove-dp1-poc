@@ -1,0 +1,12 @@
+[package]
+name = "tvm"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+config = { workspace = true }
+riscv-regs = { workspace = true }
+vcpu = { workspace = true }
+utils = { workspace = true }
+sbi-rt = { workspace = true }
+memoffset = { workspace = true }
