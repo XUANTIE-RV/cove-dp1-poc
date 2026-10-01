@@ -66,13 +66,13 @@ build_tsm() {
     fi
 
     echo "[CoVE DP-1] Building TSM from source..."
-    # The build must run with cove_tsm_poc/ as the working directory:
+    # The build must run with xvm2/ as the working directory:
     # rustup resolves the pinned nightly toolchain from
-    # cove_tsm_poc/rust-toolchain.toml based on the current directory, while
+    # xvm2/rust-toolchain.toml based on the current directory, while
     # Cargo discovers the workspace-level .cargo/config.toml located at
-    # cove_tsm_poc/.cargo/config.toml relative to that same directory.
+    # xvm2/.cargo/config.toml relative to that same directory.
     (
-        cd cove_tsm_poc
+        cd xvm2
         PATH="${RISCV_TOOLCHAIN_BIN}:${PATH}" \
             cargo build \
             --release --target "${RISCV_TARGET}" \
@@ -81,7 +81,7 @@ build_tsm() {
             -Z build-std-features=compiler-builtins-mem
     )
 
-    local elf="cove_tsm_poc/target/${RISCV_TARGET}/release/tsm"
+    local elf="xvm2/target/${RISCV_TARGET}/release/tsm"
     mkdir -p build
     cp "$elf" build/tsm.elf
     "${objcopy}" -O binary "$elf" build/tsm.bin

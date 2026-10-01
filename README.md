@@ -6,7 +6,7 @@ A CoVE DP-1 demo environment based on QEMU (RISC-V RV64GC), built from the open-
 
 This repository provides a demo environment for **CoVE DP-1**, the RISC-V Confidential VM Extension (CoVE v0.7) deployment module one, together with the open-source reference implementation of the **TSM (TEE Security Manager)**. Building and launching the demo is driven by one unified entry script, `build.sh`, at the repository root.
 
-The TSM runs at HS-mode under a machine-mode RDSM (Root Domain Security Manager) and manages the lifecycle of Trusted Virtual Machines (TVM). And it is written in Rust as a single Cargo workspace under the `cove_tsm_poc/` subdirectory.
+The TSM runs at HS-mode under a machine-mode RDSM (Root Domain Security Manager) and manages the lifecycle of Trusted Virtual Machines (TVM). And it is written in Rust as a single Cargo workspace under the `xvm2/` subdirectory.
 
 The remaining runtime components — the OpenSBI firmware (`fw_dynamic.bin`), the Host Linux kernel (`Image`), kvmtool (`lkvm-static`) and the root filesystem image — are distributed separately as the `cove-dp1-poc-runtime-rv64.tar.gz` GitHub Release asset. After extraction they reside in `cove-dp1-poc-runtime-rv64/` at the repository root; that directory is local-only and is **not** part of the source repository.
 
@@ -22,7 +22,7 @@ The remaining runtime components — the OpenSBI firmware (`fw_dynamic.bin`), th
 
 - **Host Environment**: Ubuntu 22.04 LTS (x86_64). Other Linux distributions may work but have not been tested.
 
-- **Rust nightly-2025-04-04** (pinned in `cove_tsm_poc/rust-toolchain.toml`)
+- **Rust nightly-2025-04-04** (pinned in `xvm2/rust-toolchain.toml`)
 
   ```bash
   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
@@ -94,7 +94,7 @@ never be committed.
 ./build.sh tsm
 ```
 
-Cross-compiles the TSM firmware from the Cargo workspace under `cove_tsm_poc/`.
+Cross-compiles the TSM firmware from the Cargo workspace under `xvm2/`.
 Output artifacts in `build/`:
 
 - `tsm.bin` — raw firmware binary (loaded by `./build.sh run`)
@@ -246,7 +246,7 @@ normal domain after TVM release, and the Host can access it again.
 |------|------|
 | `build.sh` | Unified entry script, supports `tsm` (build) / `run` (launch) commands |
 | `CHANGELOG.md` | Release changelog |
-| `cove_tsm_poc/` | TSM (TEE Security Manager) open-source Rust code — a single Cargo workspace |
+| `xvm2/` | TSM (TEE Security Manager) open-source Rust code — a single Cargo workspace |
 | `LICENSES/` | Collected license texts: `BSD-2-Clause.txt` and `Apache-2.0.txt` |
 | `README.md` | This documentation file |
 
@@ -260,7 +260,7 @@ The software stack of the CoVE DP-1 demo environment is layered as follows:
 │  Confidential Linux + Application Workloads             │
 │  (9P rootfs / ext4 rootfs)                              │
 ├─────────────────────────────────────────────────────────┤
-│  TSM – TEE Security Manager (HS-mode)                   │  ← this repository (cove_tsm_poc/)
+│  TSM – TEE Security Manager (HS-mode)                   │  ← this repository (xvm2/)
 │  TVM lifecycle, G-stage paging, SBI COVH/COVI/COVG      │
 ├─────────────────────────────────────────────────────────┤
 │  Host Linux + KVM (HS-mode)                             │  ← cove-dp1-poc-runtime-rv64/Image
