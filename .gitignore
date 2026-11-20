@@ -7,6 +7,11 @@ cove-dp1-poc-runtime-rv64/
 xuantie-qemu-riscv64-x86_64-linux/
 *.tar.gz
 
+# In-tree kvmtool build outputs - see also kvmtool/.gitignore
+kvmtool/lkvm
+kvmtool/lkvm-static
+kvmtool/vm
+
 # Local development artifacts
 stress_tvm.sh
 

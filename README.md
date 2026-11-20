@@ -1,20 +1,20 @@
 # CoVE DP-1 PoC — RISC-V Confidential VM Demo Environment
 
-A CoVE DP-1 demo environment based on QEMU (RISC-V RV64GC), built from the open-source TSM source code in this repository and a runtime bundle distributed separately via GitHub Release.
+A CoVE DP-1 demo environment based on QEMU (RISC-V RV64GC), built from the open-source TSM and kvmtool (lkvm) sources in this repository and a runtime bundle distributed separately via GitHub Release.
 
 ## Overview
 
-This repository provides a demo environment for **CoVE DP-1**, the RISC-V Confidential VM Extension (CoVE v0.7) deployment module one, together with the open-source reference implementation of the **TSM (TEE Security Manager)**. Building and launching the demo is driven by one unified entry script, `build.sh`, at the repository root.
+This repository provides a demo environment for **CoVE DP-1**, the RISC-V Confidential VM Extension (CoVE v0.7) deployment module one, together with the open-source reference implementations of the **TSM (TEE Security Manager)** and of **kvmtool (lkvm)**, the VMM that launches Guest TVMs from the Host Linux. Building and launching the demo is driven by one unified entry script, `build.sh`, at the repository root.
 
-The TSM runs at HS-mode under a machine-mode RDSM (Root Domain Security Manager) and manages the lifecycle of Trusted Virtual Machines (TVM). And it is written in Rust as a single Cargo workspace under the `xvm2/` subdirectory.
+The TSM runs at HS-mode under a machine-mode RDSM (Root Domain Security Manager) and manages the lifecycle of Trusted Virtual Machines (TVM). And it is written in Rust as a single Cargo workspace under the `xvm2/` subdirectory. The kvmtool sources used to build `lkvm-static` are kept in the `kvmtool/` subdirectory, together with the small libfdt subset they need.
 
-The remaining runtime components — the OpenSBI firmware (`fw_dynamic.bin`), the Host Linux kernel (`Image`), kvmtool (`lkvm-static`) and the root filesystem image — are distributed separately as the `cove-dp1-poc-runtime-rv64.tar.gz` GitHub Release asset. After extraction they reside in `cove-dp1-poc-runtime-rv64/` at the repository root; that directory is local-only and is **not** part of the source repository.
+The runtime components that are not built from this repository — the OpenSBI firmware (`fw_dynamic.bin`), the Host Linux kernel (`Image`) and the root filesystem image — are distributed separately as the `cove-dp1-poc-runtime-rv64.tar.gz` GitHub Release asset. After extraction they reside in `cove-dp1-poc-runtime-rv64/` at the repository root; that directory is local-only and is **not** part of the source repository.
 
 > **Important Notice**
 >
-> - The runtime binaries (OpenSBI firmware, Host Linux kernel, kvmtool and rootfs) are **not** part of this source repository. Download the `cove-dp1-poc-runtime-rv64.tar.gz` asset from the GitHub Release page and extract it at the repository root before running the demo. See [Download the Runtime Bundle](#download-the-runtime-bundle).
+> - The runtime binaries (OpenSBI firmware, Host Linux kernel and rootfs) are **not** part of this source repository. Download the `cove-dp1-poc-runtime-rv64.tar.gz` asset from the GitHub Release page and extract it at the repository root before running the demo. See [Download the Runtime Bundle](#download-the-runtime-bundle). The bundle also ships a prebuilt `lkvm-static`; to run a locally built one, see [Build lkvm from Source](#build-lkvm-from-source).
 > - Running this PoC requires a Smmpt-capable XuanTie QEMU, which is provided separately as a GitHub Release asset of this repository (see [Prerequisites](#prerequisites)).
-> - This project and its accompanying Release assets are intended solely as a readable proof-of-concept reference for CoVE host-side integration and end-to-end validation. They are not production-ready and must not be used in production environments.
+> - This project and its accompanying Release assets are intended solely as a readable proof-of-concept reference for CoVE host-side integration and end-to-end validation. They are not production-ready; production use is not recommended.
 
 ## Getting Started
 
@@ -84,6 +84,10 @@ The runtime binaries are distributed separately from the source repository:
    runtime files required by `./build.sh run`: `fw_dynamic.bin`, `Image`,
    `lkvm-static` and `rootfs.xuantie-image-rv64-6.6-lite.ext4`.
 
+   The bundled `lkvm-static` is a prebuilt binary. To use a locally built one
+   instead, deploy it to the running Host via SCP (e.g.
+   `scp -P 22222 build/lkvm-static root@localhost:/root/`).
+
 `cove-dp1-poc-runtime-rv64/` is a local directory obtained from the GitHub Release
 asset; it is excluded from the source repository via `.gitignore` and must
 never be committed.
@@ -101,6 +105,15 @@ Output artifacts in `build/`:
 - `tsm.elf` — ELF executable
 - `tsm.dump` — disassembly
 
+### Build lkvm from Source
+
+```bash
+./build.sh lkvm
+```
+
+Cross-compiles `lkvm-static` from `kvmtool/` and outputs `build/lkvm-static`
+(stripped static ELF for RISC-V RV64GC).
+
 ### Launch QEMU
 
 ```bash
@@ -109,7 +122,7 @@ Output artifacts in `build/`:
 
 Verifies that QEMU, the four runtime files under
 `cove-dp1-poc-runtime-rv64/` and the previously built `build/tsm.bin` are all
-present — it never rebuilds TSM implicitly — and then launches QEMU.
+present — it never rebuilds TSM or lkvm implicitly — and then launches QEMU.
 
 After QEMU finishes booting, type at the login prompt:
 
@@ -121,6 +134,14 @@ This will enter the Host Linux Shell.
 
 > **Note:** You must run `./build.sh tsm` to build TSM first; otherwise `run`
 > will report an error.
+
+### Remove Build Artifacts
+
+```bash
+./build.sh clean
+```
+
+Removes the generated artifacts.
 
 ### Demo Test Items
 
@@ -244,10 +265,11 @@ normal domain after TVM release, and the Host can access it again.
 
 | Path | Description |
 |------|------|
-| `build.sh` | Unified entry script, supports `tsm` (build) / `run` (launch) commands |
+| `build.sh` | Unified entry script, supports `tsm` / `lkvm` (build) / `run` (launch) / `clean` (remove build artifacts) commands |
 | `CHANGELOG.md` | Release changelog |
 | `xvm2/` | TSM (TEE Security Manager) open-source Rust code — a single Cargo workspace |
-| `LICENSES/` | Collected license texts: `BSD-2-Clause.txt` and `Apache-2.0.txt` |
+| `kvmtool/` | kvmtool (lkvm) sources in a flat source tree, used to build `lkvm-static` |
+| `LICENSES/` | Collected license texts: `Apache-2.0.txt`, `BSD-2-Clause.txt` and `GPL-2.0-only.txt` |
 | `README.md` | This documentation file |
 
 ## System Architecture
@@ -264,7 +286,7 @@ The software stack of the CoVE DP-1 demo environment is layered as follows:
 │  TVM lifecycle, G-stage paging, SBI COVH/COVI/COVG      │
 ├─────────────────────────────────────────────────────────┤
 │  Host Linux + KVM (HS-mode)                             │  ← cove-dp1-poc-runtime-rv64/Image
-│  Non-confidential VM management, lkvm-static            │  ← cove-dp1-poc-runtime-rv64/lkvm-static
+│  Non-confidential VM management, lkvm-static            │  ← this repository (kvmtool/)
 ├─────────────────────────────────────────────────────────┤
 │  RDSM – Root Domain Security Manager                    │  ← cove-dp1-poc-runtime-rv64/fw_dynamic.bin
 │  OpenSBI (M-mode), MPT enforcement                      │
@@ -274,8 +296,10 @@ The software stack of the CoVE DP-1 demo environment is layered as follows:
 └─────────────────────────────────────────────────────────┘
 ```
 
-- **TSM** is the only open-source component, running in HS-mode, responsible
-  for managing TVM lifecycle and memory isolation
+- **TSM** is built from this repository (`xvm2/`) and runs in HS-mode, where it
+  manages TVM lifecycle and memory isolation
+- **kvmtool (lkvm)** is built from this repository (`kvmtool/`) and runs in
+  the Host Linux, requesting TVM creation and management through KVM ioctls
 - **RDSM** (OpenSBI) runs in M-mode, enforcing physical memory domain
   isolation via MPT
 - **Host Linux + KVM** interacts with TSM through the SBI COVH extension to
